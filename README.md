@@ -18,7 +18,7 @@
 证书申请核心使用了下面的项目
 https://github.com/ywdblog/certbot-letencrypt-wildcardcertificates-alydns-au
 
-PS: 源码中仅保留了 python 部分, 改造腾讯云API3.0后, 不想维护PHP部分，就删除了PHP, 考虑到运维同学大部分会python但不一定会PHP。如需要PHP，请上述项目。
+PS: 源码中仅保留了 python 部分, 升级腾讯云API3.0后, 不想维护PHP部分，就删除了PHP, 考虑到运维同学大部分会python但不一定会PHP。如需要PHP，请查阅上述项目。
 
 ## 开发 & 运行环境
 1. Linux(Mac)
@@ -29,11 +29,9 @@ PS: 源码中仅保留了 python 部分, 改造腾讯云API3.0后, 不想维护P
 6. zip(压缩包命令)
 7. 拥有可执行权限（一般来说没问题，主要涉及到命令执行）
 
-## 配置项 Env
-
-可查看根目录的 env 文件，里面包含数据库相关的配置
-
-mysql 目录下有初始化 sql 文件
+## 初始化
+1. 使用 yarn 安装依赖 , pnpm 会有问题，估计是某个依赖造成
+2. 初始化数据库, 可查看根目录的 env 文件，里面包含数据库相关的配置, mysql 目录下有初始化 sql 文件
 
 
 ## 其他说明
