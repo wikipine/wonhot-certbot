@@ -20,3 +20,19 @@ export const getDaysRemaining = (time: string) => {
     // 将毫秒转换为天数
     return Math.ceil(timeDifference / (1000 * 3600 * 24));
 }
+
+/**
+ * 获取 _acme-challenge.${domain} 的解析记录
+ * @param domain 
+ */
+export const getAcmeTxtRecord = async (domain: string) => {
+    const url = `https://toolbox.googleapps.com/apps/dig/#TXT/_acme-challenge.${domain}`;
+    try {
+        const { data } = await useFetch(url);
+    
+        console.log(data.value);
+
+      } catch (error) {
+        console.error('Error fetching TXT record:', error);
+      }
+}

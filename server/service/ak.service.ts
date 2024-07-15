@@ -90,7 +90,8 @@ export class AkService {
         }
         return {
             key_id: rowData.key_id,
-            key_secret: rowData.key_secret
+            key_secret: rowData.key_secret,
+            dns_type: rowData.dns_type
         }
     }
 }

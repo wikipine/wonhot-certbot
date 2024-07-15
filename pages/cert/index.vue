@@ -34,7 +34,14 @@
             :key="refreshTime" 
             :visible="showCertUpload" 
             :content="certRecord"
-            @close="setShowCertUpload(false)"/>
+            @close="setShowCertUpload(false)"/> 
+        <!-- 证书生成 -->
+        <cert-create 
+            :key="showCertCreate.key" 
+            :visible="showCertCreate.visible" 
+            :content="certRecord"
+            @close="setShowCertCreate(false)"
+            @success="searchList()"/>
     </div>
 </template>
 <script setup>
@@ -43,7 +50,6 @@ import to from "await-to-js";
 import { 
     getCertListApi, 
     deleteCertRecordApi, 
-    handleCertCreateApi,
     handleCertDownloadApi
  } from "@/api/cert";
 const message = useMessage();
@@ -215,17 +221,19 @@ const onShowCertCommand = (rowIndex) => {
 }
 
 // 证书生成
-const onCertCreate = async (rowIndex) => {
-    setSearchLoading(true);
-    setHandleLoading(rowIndex, 'create', true);
-    const { id } = dataList.value[rowIndex];
-    const [err, res] = await to(handleCertCreateApi(id));
-    setHandleLoading(rowIndex, 'create', false);
-    if(err || !res.success) {
-        setSearchLoading(false);
-        return;
+const showCertCreate = reactive({
+    visible: false,
+    key: 0
+});
+const setShowCertCreate = (bool) => {
+    if (bool) {
+        showCertCreate.key = new Date().getTime();
     }
-    searchList();
+    showCertCreate.visible = bool;
+}
+const onCertCreate = async (rowIndex) => {
+    setCertRecord(rowIndex);
+    setShowCertCreate(true);
 }
 
 // 证书重新生成
@@ -237,15 +245,7 @@ const onCertReload = async (rowIndex) => {
         positiveText: '确定',
         negativeText: '取消',
         onPositiveClick: () => {
-            setSearchLoading(true);
-            handleCertCreateApi(id).then(res => {
-                if (true === res.success) {
-                    message.success('操作成功');
-                    searchList();
-                }
-            }).finally(()=>{
-                setSearchLoading(false);
-            })
+            onCertCreate(rowIndex);
         }
     })
 }

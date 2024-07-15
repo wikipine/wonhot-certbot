@@ -25,5 +25,18 @@ export const menuOptions = [
                 key: "setting-ssh",
             }
         ]
+    },
+    {
+        label: "功能调试",
+        key: "test",
+        icon: () => {
+            return h(Icon, { name: 'material-symbols:code', size: '18' })
+        },
+        children: [
+            {
+                label: "DNS调试",
+                key: "test-dns",
+            }
+        ]
     }
 ];

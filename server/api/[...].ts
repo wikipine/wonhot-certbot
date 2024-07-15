@@ -4,6 +4,7 @@ import { useBase, createRouter, defineEventHandler } from 'h3';
 import * as CertController from '~~/server/controller/cert';
 import * as AkController from '~~/server/controller/ak';
 import * as SSHController from '~~/server/controller/ssh';
+import * as TestController from '~~/server/controller/test';
 
 const router = createRouter();
 
@@ -27,5 +28,11 @@ router.post('/ssh/record/add', defineEventHandler(SSHController.createRecord));
 router.post('/ssh/record/update', defineEventHandler(SSHController.updateRecord));
 router.post('/ssh/record/delete', defineEventHandler(SSHController.deleteRecord));
 router.post('/ssh/connect/test', defineEventHandler(SSHController.connectTest));
+
+// 测试调试相关操作
+router.get('/test/dns/record/list', defineEventHandler(TestController.getDomainRecord));
+router.post('/test/dns/record/delete', defineEventHandler(TestController.deleteDomainRecord));
+router.post('/test/dns/record/add', defineEventHandler(TestController.addDomainRecord));
+router.post('/test/dns/record/check', defineEventHandler(TestController.checkDomainRecord));
 
 export default useBase('/api', router.handler);

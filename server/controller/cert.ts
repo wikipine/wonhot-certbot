@@ -13,6 +13,8 @@ import {
 import { CertStatusEnum, CertDNSTypeEnum, CertDNSTypeLabelEnum } from "../enum";
 import { AkService } from '@/server/service/ak.service';
 import { SSHService } from '@/server/service/ssh.service';
+import { CertService, CertParamsType } from '@/server/service/cert.service';
+import getPort from 'get-port';
 
 
 /**
@@ -159,9 +161,6 @@ export const handleCertCreate = async (evt: H3Event) => {
         if(!key_id || !key_secret) {
             return responseError(-1, 'key_id 或 key_secret 为空');
         }
-        const config = useRuntimeConfig();
-        const addhook = [config.public.VITE_PYTHON_CMD_PATH, 'python', dns_type, 'add', key_id, key_secret];
-        const cleanhook = [config.public.VITE_PYTHON_CMD_PATH, 'python', dns_type, 'clean', key_id, key_secret];
         // 2 检查环境配置
         const version = execCommand('certbot', ['--version']);
         if(!version.status) {
@@ -169,47 +168,24 @@ export const handleCertCreate = async (evt: H3Event) => {
         }
         // 删除存在的日志文件，只保留最近一次
         execCommand('rm', ['-rf', './logs/cert/letsencrypt.log.*']);
-        // 3 生成脚本参数
-        let params = ['certonly'];
-        params.push('--email ' + email);
-        domainArr.forEach((val:string) => {
-            params.push('-d ' + val);
-        });
-        params = params.concat([
-            '--manual',
-            '--manual-auth-hook "./shell/manual-hook/au.sh ' + addhook.join(' ') + '"',
-            '--manual-cleanup-hook "./shell/manual-hook/au.sh ' + cleanhook.join(' ') + '"',
-            '--preferred-challenges',
-            'dns',
-            '--server',
-            'https://acme-v02.api.letsencrypt.org/directory',
-            '--config-dir',
-            './logs/cert',
-            '--work-dir',
-            './logs/cert',
-            '--logs-dir',
-            './logs/cert',
-            '--non-interactive',
-            '--agree-tos',
-        ]);
-        const res = execCommand('certbot', params);
-        if(res.stdout.indexOf("Certificate not yet due for renewal") != -1) {
-            return responseError(-1, '当前证书未过期，无需重新生成');
+        
+        // 创建 websocket server
+        const wsServerPort = await getPort(); // 获取一个可用的随机端口
+        const certService = new CertService();
+        
+        // 证书创建所需参数
+        const certParams: CertParamsType = {
+            cert_id: id,
+            domain,
+            email,
+            dns_type,
+            key_id, 
+            key_secret
         }
-        if(res.stdout.indexOf('Successfully received certificate') != -1) {
-            let updateData = {
-                expired_at : new Date().getTime() + 86400 * 30 * 3 * 1000,
-                status: CertStatusEnum.SUCCESS
-            }
-            await CertModel.update(updateData, {
-                where: {
-                    id: id
-                }
-            });
-            return responseSuccess(true);
-        } else {
-            return responseError(-1, res.stderr + '[' + res.completeCommand + ']');
-        }
+        certService.createCertServer(wsServerPort, certParams);
+
+        return responseSuccess({ port: wsServerPort });
+
     } catch (err:any) {
         return responseError(500, err.message);
     }
